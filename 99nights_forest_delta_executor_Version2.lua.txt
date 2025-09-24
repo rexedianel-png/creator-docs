@@ -188,4 +188,4 @@ end
 print("99 Nights in the Forest Script Loaded! All features enabled.")
 
 -- Loadstring for Delta Executor:
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/YourUser/YourRepo/main/99nights_forest_delta_executor.lua"))()
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/rexedianel-png/creator-docs/main/99nights_forest_delta_executor.lua"))()
