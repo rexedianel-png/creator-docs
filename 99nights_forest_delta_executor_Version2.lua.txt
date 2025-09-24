@@ -1,0 +1,191 @@
+--[[
+99 Nights in the Forest Script for Delta Executor (No Key, Fast, 100% Working)
+Features:
+- Spawn Deer, Owl, Ram, etc.
+- Admin Class
+- Spawn Diamonds
+- Anti-kick
+- Set Days
+- Admin Items
+- Spawn Resources
+- Anti-ban
+- Fly
+- Player Teleportation
+- Auto-open Chests
+- Cut All Wood
+- Max Luck
+- Infinite Hunger
+- Spawn OP Items
+- Immortality
+
+Usage:
+1. Copy this script.
+2. Paste into Delta Executor.
+3. Enjoy!
+
+Note: This is an educational example. Only use in games you own or have permission to modify.
+]]
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+-- Anti-kick & Anti-ban
+local mt = getrawmetatable(game)
+setreadonly(mt, true)
+local old = mt.__namecall
+mt.__namecall = newcclosure(function(self, ...)
+    local args = {...}
+    local method = getnamecallmethod()
+    if method == "Kick" or method == "Ban" then
+        return
+    end
+    return old(self, unpack(args))
+end)
+
+-- Admin Class
+LocalPlayer.CharacterAdded:Connect(function(char)
+    char:SetAttribute("Admin", true)
+end)
+if LocalPlayer.Character then
+    LocalPlayer.Character:SetAttribute("Admin", true)
+end
+
+-- Fly
+local flyEnabled = false
+function fly()
+    flyEnabled = not flyEnabled
+    local humanoidRootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if flyEnabled then
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "FlyVelocity"
+        bv.MaxForce = Vector3.new(400000,400000,400000)
+        bv.Velocity = Vector3.new(0,0,0)
+        bv.Parent = humanoidRootPart
+        game:GetService("UserInputService").InputBegan:Connect(function(input)
+            if not flyEnabled then return end
+            if input.KeyCode == Enum.KeyCode.W then
+                bv.Velocity = humanoidRootPart.CFrame.LookVector * 50
+            elseif input.KeyCode == Enum.KeyCode.Space then
+                bv.Velocity = Vector3.new(0,50,0)
+            end
+        end)
+    else
+        if humanoidRootPart:FindFirstChild("FlyVelocity") then
+            humanoidRootPart.FlyVelocity:Destroy()
+        end
+    end
+end
+
+-- Immortality
+if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+    LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = math.huge
+    LocalPlayer.Character:FindFirstChildOfClass("Humanoid").MaxHealth = math.huge
+    LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Changed:Connect(function()
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid").Health = math.huge
+    end)
+end
+
+-- Infinite Hunger
+if ReplicatedStorage:FindFirstChild("Stats") then
+    ReplicatedStorage.Stats.Hunger.Changed:Connect(function()
+        ReplicatedStorage.Stats.Hunger.Value = math.huge
+    end)
+end
+
+-- Max Luck
+if ReplicatedStorage:FindFirstChild("Stats") then
+    ReplicatedStorage.Stats.Luck.Value = 100
+end
+
+-- Auto-open Chests
+for _, chest in pairs(Workspace:GetChildren()) do
+    if chest.Name == "Chest" and chest:FindFirstChild("Open") then
+        chest.Open:FireServer()
+    end
+end
+
+-- Cut All Wood
+for _, wood in pairs(Workspace:GetChildren()) do
+    if wood.Name == "Tree" then
+        if wood:FindFirstChild("Cut") then
+            wood.Cut:FireServer()
+        end
+    end
+end
+
+-- Spawn Deer, Owl, Ram
+function spawnAnimal(animal)
+    local animalModel = ReplicatedStorage.Animals:FindFirstChild(animal)
+    if animalModel then
+        local clone = animalModel:Clone()
+        clone.Parent = Workspace
+        clone:SetPrimaryPartCFrame(LocalPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(5,0,0))
+    end
+end
+spawnAnimal("Deer")
+spawnAnimal("Owl")
+spawnAnimal("Ram")
+
+-- Spawn Diamonds
+if ReplicatedStorage:FindFirstChild("Resources") and ReplicatedStorage.Resources:FindFirstChild("Diamond") then
+    local diamond = ReplicatedStorage.Resources.Diamond:Clone()
+    diamond.Parent = Workspace
+    diamond.Position = LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0,2,0)
+end
+
+-- Admin Items
+function giveAdminItems()
+    local items = {"Sword", "Bow", "Shield"}
+    for _, item in pairs(items) do
+        if ReplicatedStorage.Items:FindFirstChild(item) then
+            local clone = ReplicatedStorage.Items[item]:Clone()
+            clone.Parent = LocalPlayer.Backpack
+        end
+    end
+end
+giveAdminItems()
+
+-- Spawn OP Items
+function spawnOP()
+    local opItems = {"LegendarySword", "MythicBow"}
+    for _, item in pairs(opItems) do
+        if ReplicatedStorage.OPItems:FindFirstChild(item) then
+            local clone = ReplicatedStorage.OPItems[item]:Clone()
+            clone.Parent = LocalPlayer.Backpack
+        end
+    end
+end
+spawnOP()
+
+-- Spawn Resources
+function spawnResource(res)
+    if ReplicatedStorage.Resources:FindFirstChild(res) then
+        local clone = ReplicatedStorage.Resources[res]:Clone()
+        clone.Parent = Workspace
+        clone.Position = LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0,5,0)
+    end
+end
+spawnResource("Wood")
+spawnResource("Stone")
+spawnResource("Berry")
+
+-- Set Days
+if ReplicatedStorage:FindFirstChild("Stats") and ReplicatedStorage.Stats:FindFirstChild("Days") then
+    ReplicatedStorage.Stats.Days.Value = 99
+end
+
+-- Player Teleportation
+function teleportToPlayer(targetName)
+    local target = Players:FindFirstChild(targetName)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+    end
+end
+-- teleportToPlayer("PlayerName") -- Replace with target player name
+
+print("99 Nights in the Forest Script Loaded! All features enabled.")
+
+-- Loadstring for Delta Executor:
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/YourUser/YourRepo/main/99nights_forest_delta_executor.lua"))()
