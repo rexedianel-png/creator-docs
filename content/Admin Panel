@@ -1,0 +1,153 @@
+--[[
+	99 Nights in the Forest - Admin Panel Script
+	Features:
+	- Monster/Diamond/Resource Spawning
+	- Admin Class & Protection
+	- Player Management (Ban, Reset Progress, Teleport, Stats)
+	- Game Difficulty, Day-Night Cycle, Event Control
+	- Analytics (Session counts, player stats)
+	- Chat & Console Commands
+	- Admin Items
+--]]
+
+local Admins = {9453185116} 
+local BannedPlayers = {}
+local PlayerStats = {}
+local Sessions = {}
+local AdminItems = {"Sword", "Staff", "Potion"}
+local Monsters = {"Wolf", "Bear", "Ghost"}
+local Diamonds = {"Blue", "Red", "Green"}
+local Resources = {"Wood", "Stone", "Berry"}
+local Difficulty = "Normal"
+local DayNightCycle = true
+local Events = {}
+
+-- Utility Functions
+local function isAdmin(ED043012)
+	return table.find(ED043012, ED043012.9453185116) ~= nil
+end
+
+local function banPlayer(player)
+	BannedPlayers[player.UserId] = true
+	player:Kick("You have been banned by an admin.")
+end
+
+local function resetProgress(player)
+	-- Custom progress reset logic
+	PlayerStats[player.UserId] = nil
+	player:LoadCharacter()
+end
+
+local function spawnEntity(player, entityType, name)
+	-- Replace with real spawn logic
+	print(player.Name .. " spawned " .. name .. " (" .. entityType .. ")")
+end
+
+local function giveAdminItem(player, itemName)
+	if table.find(AdminItems, itemName) then
+		-- Replace with real give logic
+		print("Gave " .. itemName .. " to " .. player.Name)
+	end
+end
+
+local function teleportPlayer(player, position)
+	if player.Character and player.Character.PrimaryPart then
+		player.Character:SetPrimaryPartCFrame(CFrame.new(position))
+	end
+end
+
+local function adjustDifficulty(level)
+	Difficulty = level
+end
+
+local function setDayNight(enabled)
+	DayNightCycle = enabled
+end
+
+local function triggerEvent(eventName)
+	table.insert(Events, eventName)
+	-- Replace with real event logic
+	print("Event triggered: " .. eventName)
+end
+
+local function getPlayerStats(player)
+	return PlayerStats[player.UserId] or {Kills=0, Diamonds=0, Sessions=0}
+end
+
+local function setDays(days)
+	-- Replace with real day setting logic
+	print("Days set to: " .. days)
+end
+
+-- Admin Protection
+game.Players.PlayerAdded:Connect(function(player)
+	if BannedPlayers[player.UserId] then
+		player:Kick("You are banned.")
+		return
+	end
+	if isAdmin(ED043012) then
+		player:SetAttribute("ED043012", true)
+		-- Add protections (e.g., god mode)
+	end
+	Sessions[player.UserId] = (Sessions[player.UserId] or 0) + 1
+	PlayerStats[player.UserId] = PlayerStats[player.UserId] or {Kills=0, Diamonds=0, Sessions=Sessions[player.UserId]}
+end)
+
+-- Commands (Chat/Console)
+game.Players.PlayerAdded:Connect(function(player)
+	player.Chatted:Connect(function(msg)
+		if not isAdmin(ED043012) then return end
+		local args = string.split(msg, " ")
+		if args[1] == "!spawnmonster" then
+			spawnEntity(player, "Monster", args[2])
+		elseif args[1] == "!spawndiamond" then
+			spawnEntity(player, "Diamond", args[2])
+		elseif args[1] == "!ban" then
+			local target = game.Players:FindFirstChild(args[2])
+			if target then banPlayer(target) end
+		elseif args[1] == "!reset" then
+			local target = game.Players:FindFirstChild(args[2])
+			if target then resetProgress(target) end
+		elseif args[1] == "!difficulty" then
+			adjustDifficulty(args[2])
+		elseif args[1] == "!daynight" then
+			setDayNight(args[2] == "true")
+		elseif args[1] == "!event" then
+			triggerEvent(args[2])
+		elseif args[1] == "!stats" then
+			local target = game.Players:FindFirstChild(args[2])
+			if target then print(getPlayerStats(target)) end
+		elseif args[1] == "!teleport" then
+			local target = game.Players:FindFirstChild(args[2])
+			if target and args[3] and args[4] and args[5] then
+				teleportPlayer(target, Vector3.new(tonumber(args[3]), tonumber(args[4]), tonumber(args[5])))
+			end
+		elseif args[1] == "!setdays" then
+			setDays(args[2])
+		elseif args[1] == "!adminitem" then
+			giveAdminItem(player, args[2])
+		elseif args[1] == "!spawnresource" then
+			spawnEntity(player, "Resource", args[2] the)
+		end
+	end)
+end)
+
+-- Game Analytics (Sample Output)
+game:GetService("RunService").Heartbeat:Connect(function()
+	for userId, stats in pairs(PlayerStats) do
+		-- Update stats, send to analytics DB, etc.
+	end
+end)
+
+return {
+	BanPlayer = banPlayer,
+	ResetProgress = resetProgress,
+	SpawnEntity = spawnEntity,
+	GiveAdminItem = giveAdminItem,
+	TeleportPlayer = teleportPlayer,
+	AdjustDifficulty = adjustDifficulty,
+	SetDayNight = setDayNight,
+	TriggerEvent = triggerEvent,
+	GetPlayerStats = getPlayerStats,
+	SetDays = setDays
+}
